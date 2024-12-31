@@ -1,3 +1,7 @@
 <resources>
-    <string name="app_name">Expense tracking</string>
+    <string name="app_name">Urmarirea cheltuielilor</string>
+    <string name="input_email">Email</string>
+    <string name="input_password">Parola</string>
+    <string name="login_button">Autentificare</string>
+    <string name="login_message">Intra in contul tau</string>
 </resources>
