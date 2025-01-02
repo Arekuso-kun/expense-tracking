@@ -51,8 +51,8 @@ public class ExpenseActivity extends AppCompatActivity {
     }
 
     public void onSaveExpense(View view) {
-        String title = titleInput.getText().toString();
-        String amountString = amountInput.getText().toString();
+        String title = titleInput.getText().toString().trim();
+        String amountString = amountInput.getText().toString().trim();
 
         if (!title.isEmpty() && !amountString.isEmpty()) {
             try {

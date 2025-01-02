@@ -70,19 +70,11 @@ public class SignupActivity extends AppCompatActivity {
 
         firebaseAuth.createUserWithEmailAndPassword(email, password).addOnCompleteListener(this, task -> {
             if (task.isSuccessful()) {
-                firebaseAuth.getCurrentUser().sendEmailVerification()
-                        .addOnCompleteListener(verificationTask -> {
-                            if (verificationTask.isSuccessful()) {
-                                Toast.makeText(SignupActivity.this, "Cont creat cu succes! Verificati email-ul pentru activare.", Toast.LENGTH_LONG).show();
-                                startActivity(new Intent(SignupActivity.this, LoginActivity.class));
-                                finish();
-                            } else {
-                                Toast.makeText(SignupActivity.this, "Eroare la trimiterea email-ului de verificare.", Toast.LENGTH_SHORT).show();
-                            }
-                        });
+                Toast.makeText(SignupActivity.this, "Cont creat cu succes!", Toast.LENGTH_LONG).show();
+                startActivity(new Intent(SignupActivity.this, LoginActivity.class));
+                finish();
             } else {
                 Toast.makeText(SignupActivity.this, "Eroare la creare cont: " + task.getException().getMessage(), Toast.LENGTH_SHORT).show();
-
             }
         });
     }

@@ -32,8 +32,8 @@ public class LoginActivity extends AppCompatActivity {
         loginButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                String email = emailInput.getText().toString();
-                String password = passwordInput.getText().toString();
+                String email = emailInput.getText().toString().trim();
+                String password = passwordInput.getText().toString().trim();
 
                 if (email.isEmpty() || password.isEmpty()) {
                     Toast.makeText(LoginActivity.this, "Introduceti email-ul si parola!", Toast.LENGTH_SHORT).show();
@@ -51,7 +51,6 @@ public class LoginActivity extends AppCompatActivity {
             }
         });
 
-
         checkSavedCredentials();
     }
 
@@ -59,14 +58,9 @@ public class LoginActivity extends AppCompatActivity {
         firebaseAuth.signInWithEmailAndPassword(email, password)
                 .addOnCompleteListener(this, task -> {
                     if (task.isSuccessful()) {
-                        FirebaseUser user = firebaseAuth.getCurrentUser();
-                        if (user != null && user.isEmailVerified()) {
-                            Intent intent = new Intent(LoginActivity.this, DashboardActivity.class);
-                            startActivity(intent);
-                            finish();
-                        } else {
-                            Toast.makeText(LoginActivity.this, "Verificati email-ul!", Toast.LENGTH_SHORT).show();
-                        }
+                        Intent intent = new Intent(LoginActivity.this, DashboardActivity.class);
+                        startActivity(intent);
+                        finish();
                     } else {
                         Toast.makeText(LoginActivity.this, "Email sau parola incorecta!", Toast.LENGTH_SHORT).show();
                     }
@@ -75,7 +69,7 @@ public class LoginActivity extends AppCompatActivity {
 
     private void checkSavedCredentials() {
         FirebaseUser currentUser = firebaseAuth.getCurrentUser();
-        if (currentUser != null && currentUser.isEmailVerified()) {
+        if (currentUser != null) {
             Intent intent = new Intent(LoginActivity.this, DashboardActivity.class);
             startActivity(intent);
             finish();
