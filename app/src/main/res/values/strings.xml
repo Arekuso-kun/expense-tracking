@@ -3,8 +3,15 @@
 
     <string name="input_email">Email</string>
     <string name="input_password">Parola</string>
+    <string name="input_password_confirm">Confirma parola</string>
+
     <string name="login_button">Autentificare</string>
     <string name="login_message">Intra in contul tau</string>
+    <string name="login_signup_button">Creaza cont</string>
+
+    <string name="signup_button">Inregistrare</string>
+    <string name="signup_back_button">Inapoi la autentificare</string>
+    <string name="signup_message">Creaza un contul nou</string>
 
     <string name="menu_add">Adauga</string>
     <string name="menu_logout">Deconectare</string>

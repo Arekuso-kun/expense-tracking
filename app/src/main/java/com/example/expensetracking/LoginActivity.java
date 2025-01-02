@@ -6,22 +6,19 @@ import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
 import android.widget.Toast;
+
 import androidx.appcompat.app.AppCompatActivity;
 import com.google.android.material.textfield.TextInputEditText;
-import java.util.HashMap;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
 
 public class LoginActivity extends AppCompatActivity {
 
     private TextInputEditText emailInput, passwordInput;
     private Button loginButton;
+    private Button signupButton;
+    private FirebaseAuth firebaseAuth;
     private SharedPreferences sharedPreferences;
-
-    // Utilizatori hardcodați
-    private final HashMap<String, String> users = new HashMap<String, String>() {{
-        put("test1@example.com", "parola1");
-        put("test2@example.com", "parola2");
-        put("admin@example.com", "admin123");
-    }};
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -31,7 +28,9 @@ public class LoginActivity extends AppCompatActivity {
         emailInput = findViewById(R.id.emailInput);
         passwordInput = findViewById(R.id.passwordInput);
         loginButton = findViewById(R.id.loginButton);
+        signupButton = findViewById(R.id.signupButton);
 
+        firebaseAuth = FirebaseAuth.getInstance();
         sharedPreferences = getSharedPreferences("UserAuth", MODE_PRIVATE);
 
         loginButton.setOnClickListener(new View.OnClickListener() {
@@ -48,19 +47,35 @@ public class LoginActivity extends AppCompatActivity {
             }
         });
 
+        signupButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(LoginActivity.this, SignupActivity.class);
+                startActivity(intent);
+            }
+        });
+
+
         checkSavedCredentials();
     }
 
     private void authenticateUser(String email, String password) {
-        if (users.containsKey(email) && users.get(email).equals(password)) {
-            saveCredentials(email);
-
-            Intent intent = new Intent(LoginActivity.this, DashboardActivity.class);
-            startActivity(intent);
-            finish();
-        } else {
-            Toast.makeText(this, "Email sau parola incorecta!", Toast.LENGTH_SHORT).show();
-        }
+        firebaseAuth.signInWithEmailAndPassword(email, password)
+                .addOnCompleteListener(this, task -> {
+                    if (task.isSuccessful()) {
+                        FirebaseUser user = firebaseAuth.getCurrentUser();
+                        if (user != null && user.isEmailVerified()) {
+                            saveCredentials(user.getEmail());
+                            Intent intent = new Intent(LoginActivity.this, DashboardActivity.class);
+                            startActivity(intent);
+                            finish();
+                        } else {
+                            Toast.makeText(LoginActivity.this, "Verificati email-ul!", Toast.LENGTH_SHORT).show();
+                        }
+                    } else {
+                        Toast.makeText(LoginActivity.this, "Email sau parola incorecta!", Toast.LENGTH_SHORT).show();
+                    }
+                });
     }
 
     private void saveCredentials(String email) {
@@ -70,8 +85,9 @@ public class LoginActivity extends AppCompatActivity {
     }
 
     private void checkSavedCredentials() {
-        String savedEmail = sharedPreferences.getString("email", null);
-        if (savedEmail != null) {
+        FirebaseUser currentUser = firebaseAuth.getCurrentUser();
+        if (currentUser != null && currentUser.isEmailVerified()) {
+            saveCredentials(currentUser.getEmail());
             Intent intent = new Intent(LoginActivity.this, DashboardActivity.class);
             startActivity(intent);
             finish();

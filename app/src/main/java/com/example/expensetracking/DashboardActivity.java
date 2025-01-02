@@ -13,6 +13,8 @@ import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import com.google.firebase.auth.FirebaseAuth;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -56,6 +58,8 @@ public class DashboardActivity extends AppCompatActivity {
         if (selectedItem == R.id.action_add) {
             showAddExpenseDialog();
         } else if (selectedItem == R.id.action_logout) {
+            FirebaseAuth.getInstance().signOut();
+
             getSharedPreferences("UserAuth", MODE_PRIVATE)
                     .edit()
                     .clear()
