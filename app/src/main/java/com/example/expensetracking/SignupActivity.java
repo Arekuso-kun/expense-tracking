@@ -2,6 +2,7 @@ package com.example.expensetracking;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.util.Patterns;
 import android.view.View;
 import android.widget.Button;
 import android.widget.Toast;
@@ -45,7 +46,6 @@ public class SignupActivity extends AppCompatActivity {
                 finish();
             }
         });
-
     }
 
     private void createAccount() {
@@ -58,13 +58,18 @@ public class SignupActivity extends AppCompatActivity {
             return;
         }
 
+        if (!Patterns.EMAIL_ADDRESS.matcher(email).matches()) {
+            Toast.makeText(this, "Email invalid! Introdu un email corect.", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
         if (!password.equals(confirmPassword)) {
             Toast.makeText(this, "Parolele nu se potrivesc!", Toast.LENGTH_SHORT).show();
             return;
         }
 
         if (password.length() < 6) {
-            Toast.makeText(this, "Parola trebuie să aiba cel putin 6 caractere!", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, "Parola trebuie sa aiba cel putin 6 caractere!", Toast.LENGTH_SHORT).show();
             return;
         }
 
@@ -74,7 +79,7 @@ public class SignupActivity extends AppCompatActivity {
                 startActivity(new Intent(SignupActivity.this, LoginActivity.class));
                 finish();
             } else {
-                Toast.makeText(SignupActivity.this, "Eroare la creare cont: " + task.getException().getMessage(), Toast.LENGTH_SHORT).show();
+                Toast.makeText(SignupActivity.this, "Eroare: " + task.getException().getMessage(), Toast.LENGTH_SHORT).show();
             }
         });
     }
