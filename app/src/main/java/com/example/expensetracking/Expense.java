@@ -1,9 +1,12 @@
 package com.example.expensetracking;
 
+import java.util.Date;
+
 public class Expense {
     private String id;
     private String title;
     private double amount;
+    private Date creationDate;
 
     public Expense() {}
 
@@ -32,7 +35,15 @@ public class Expense {
         return amount;
     }
 
+    public Date getCreationDate() {
+        return creationDate;
+    }
+
     public void setAmount(double amount) {
         this.amount = amount;
+    }
+
+    public void setCreationDate(Date creationDate) {
+        this.creationDate = creationDate;
     }
 }

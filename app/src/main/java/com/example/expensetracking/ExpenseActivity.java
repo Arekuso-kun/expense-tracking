@@ -9,6 +9,7 @@ import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import com.google.firebase.firestore.FieldValue;
 import com.google.firebase.firestore.FirebaseFirestore;
 
 import java.util.HashMap;
@@ -72,6 +73,7 @@ public class ExpenseActivity extends AppCompatActivity {
                     Map<String, Object> expenseData = new HashMap<>();
                     expenseData.put("title", title);
                     expenseData.put("amount", amount);
+                    expenseData.put("creationDate", FieldValue.serverTimestamp()); // Add creation date
 
                     db.collection("users").document(uid)
                             .collection("expenses")
