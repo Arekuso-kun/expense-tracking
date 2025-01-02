@@ -2,6 +2,7 @@ package com.example.expensetracking;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.ContextMenu;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -14,6 +15,9 @@ import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.firestore.DocumentSnapshot;
+import com.google.firebase.firestore.FirebaseFirestore;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -23,6 +27,9 @@ public class DashboardActivity extends AppCompatActivity {
     private ListView expensesListView;
     private ExpenseAdapter expenseAdapter;
     private List<Expense> expenses = new ArrayList<>();
+    private FirebaseFirestore db;
+    private FirebaseAuth firebaseAuth;
+    private FirebaseUser user;
     private int selectedExpensePosition = -1;
 
     @Override
@@ -30,17 +37,40 @@ public class DashboardActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_dashboard);
 
+        db = FirebaseFirestore.getInstance();
+        firebaseAuth = FirebaseAuth.getInstance();
+
         expensesListView = findViewById(R.id.expensesListView);
         expenseAdapter = new ExpenseAdapter(this, expenses);
         expensesListView.setAdapter(expenseAdapter);
 
         registerForContextMenu(expensesListView);
 
-        String savedEmail = getSharedPreferences("UserAuth", MODE_PRIVATE).getString("email", "Unknown");
-        Toast.makeText(this, "Bine ai revenit, " + savedEmail + "!", Toast.LENGTH_SHORT).show();
+        user = firebaseAuth.getCurrentUser();
+        Toast.makeText(this, "Bine ai revenit, " + user.getEmail() + "!", Toast.LENGTH_SHORT).show();
+
+        loadExpenses();
 
         expensesListView.setOnItemClickListener((parent, view, position, id) -> {
             selectedExpensePosition = position;
+        });
+    }
+
+    private void loadExpenses() {
+        Log.d("ExpenseActivity", "UID: " + user.getUid());
+        db.collection("users").document(user.getUid())
+                .collection("expenses").get().addOnCompleteListener(task -> {
+            if (task.isSuccessful()) {
+                expenses.clear();
+                for (DocumentSnapshot doc : task.getResult()) {
+                    Expense expense = doc.toObject(Expense.class);
+                    expense.setId(doc.getId());
+                    expenses.add(expense);
+                }
+                expenseAdapter.notifyDataSetChanged();
+            } else {
+                Toast.makeText(this, "Eroare la încarcarea cheltuielilor", Toast.LENGTH_SHORT).show();
+            }
         });
     }
 
@@ -60,11 +90,6 @@ public class DashboardActivity extends AppCompatActivity {
         } else if (selectedItem == R.id.action_logout) {
             FirebaseAuth.getInstance().signOut();
 
-            getSharedPreferences("UserAuth", MODE_PRIVATE)
-                    .edit()
-                    .clear()
-                    .apply();
-
             Intent intent = new Intent(this, LoginActivity.class);
             intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
             startActivity(intent);
@@ -77,22 +102,30 @@ public class DashboardActivity extends AppCompatActivity {
 
     private void showAddExpenseDialog() {
         Intent intent = new Intent(this, ExpenseActivity.class);
+        intent.putExtra(ExpenseActivity.EXTRA_UID, user.getUid());
         startActivityForResult(intent, 1);
     }
 
     private void showEditExpenseDialog(Expense expense) {
         Intent intent = new Intent(this, ExpenseActivity.class);
+        intent.putExtra(ExpenseActivity.EXTRA_ID, expense.getId());
+        intent.putExtra(ExpenseActivity.EXTRA_UID, user.getUid());
         intent.putExtra(ExpenseActivity.EXTRA_TITLE, expense.getTitle());
         intent.putExtra(ExpenseActivity.EXTRA_AMOUNT, expense.getAmount());
-        intent.putExtra(ExpenseActivity.EXTRA_POSITION, selectedExpensePosition);
         startActivityForResult(intent, 2);
     }
 
     private void deleteExpense() {
-        expenses.remove(selectedExpensePosition);
-        expenseAdapter.notifyDataSetChanged();
-        selectedExpensePosition = -1;
-        Toast.makeText(this, "Cheltuiala a fost stearsa!", Toast.LENGTH_SHORT).show();
+        String expenseId = expenses.get(selectedExpensePosition).getId();
+        db.collection("users").document(user.getUid())
+                .collection("expenses").document(expenseId).delete()
+                .addOnSuccessListener(aVoid -> {
+                    expenses.remove(selectedExpensePosition);
+                    expenseAdapter.notifyDataSetChanged();
+                    selectedExpensePosition = -1;
+                    Toast.makeText(this, "Cheltuiala a fost ștearsa!", Toast.LENGTH_SHORT).show();
+                })
+                .addOnFailureListener(e -> Toast.makeText(this, "Eroare la stergere!", Toast.LENGTH_SHORT).show());
     }
 
     @Override
@@ -124,23 +157,7 @@ public class DashboardActivity extends AppCompatActivity {
         super.onActivityResult(requestCode, resultCode, data);
 
         if (resultCode == RESULT_OK) {
-            String title = data.getStringExtra(ExpenseActivity.EXTRA_TITLE);
-            double amount = data.getDoubleExtra(ExpenseActivity.EXTRA_AMOUNT, 0);
-
-            if (requestCode == 1) {
-                // Add expense
-                expenses.add(new Expense(title, amount));
-            } else if (requestCode == 2) {
-                // Edit expense
-                int position = data.getIntExtra(ExpenseActivity.EXTRA_POSITION, -1);
-                if (position != -1) {
-                    Expense expense = expenses.get(position);
-                    expense.setTitle(title);
-                    expense.setAmount(amount);
-                }
-            }
-
-            expenseAdapter.notifyDataSetChanged();
+            loadExpenses();
         }
     }
 }
