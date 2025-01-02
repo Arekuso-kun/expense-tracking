@@ -1,5 +1,6 @@
 package com.example.expensetracking;
 
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.view.View;
@@ -53,7 +54,10 @@ public class MainActivity extends AppCompatActivity {
     private void authenticateUser(String email, String password) {
         if (users.containsKey(email) && users.get(email).equals(password)) {
             saveCredentials(email);
-            Toast.makeText(this, "Autentificare reusita!", Toast.LENGTH_SHORT).show();
+
+            Intent intent = new Intent(MainActivity.this, DashboardActivity.class);
+            startActivity(intent);
+            finish();
         } else {
             Toast.makeText(this, "Email sau parola incorecta!", Toast.LENGTH_SHORT).show();
         }
@@ -68,7 +72,9 @@ public class MainActivity extends AppCompatActivity {
     private void checkSavedCredentials() {
         String savedEmail = sharedPreferences.getString("email", null);
         if (savedEmail != null) {
-            Toast.makeText(this, "Bine ai revenit, " + savedEmail + "!", Toast.LENGTH_SHORT).show();
+            Intent intent = new Intent(MainActivity.this, DashboardActivity.class);
+            startActivity(intent);
+            finish();
         }
     }
 }
