@@ -10,7 +10,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import com.google.android.material.textfield.TextInputEditText;
 import java.util.HashMap;
 
-public class MainActivity extends AppCompatActivity {
+public class LoginActivity extends AppCompatActivity {
 
     private TextInputEditText emailInput, passwordInput;
     private Button loginButton;
@@ -41,7 +41,7 @@ public class MainActivity extends AppCompatActivity {
                 String password = passwordInput.getText().toString();
 
                 if (email.isEmpty() || password.isEmpty()) {
-                    Toast.makeText(MainActivity.this, "Introduceti email-ul si parola!", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(LoginActivity.this, "Introduceti email-ul si parola!", Toast.LENGTH_SHORT).show();
                 } else {
                     authenticateUser(email, password);
                 }
@@ -55,7 +55,7 @@ public class MainActivity extends AppCompatActivity {
         if (users.containsKey(email) && users.get(email).equals(password)) {
             saveCredentials(email);
 
-            Intent intent = new Intent(MainActivity.this, DashboardActivity.class);
+            Intent intent = new Intent(LoginActivity.this, DashboardActivity.class);
             startActivity(intent);
             finish();
         } else {
@@ -72,7 +72,7 @@ public class MainActivity extends AppCompatActivity {
     private void checkSavedCredentials() {
         String savedEmail = sharedPreferences.getString("email", null);
         if (savedEmail != null) {
-            Intent intent = new Intent(MainActivity.this, DashboardActivity.class);
+            Intent intent = new Intent(LoginActivity.this, DashboardActivity.class);
             startActivity(intent);
             finish();
         }
